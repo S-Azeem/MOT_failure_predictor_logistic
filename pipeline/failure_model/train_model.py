@@ -10,12 +10,15 @@ gain from the text is measured directly.
   4. Logistic + text     - original + advisory categories
   5. Boosting + text     - original + advisory categories
 
-Time-based split: train on tests before TEST_START, test on tests from it.
-(Roadmap Phase 0 moves selection decisions onto a 2023 validation period.)
+Three-way split by date (roadmap Phase 0):
+  train       tests before VALIDATION_START       -> fit models
+  validation  VALIDATION_START to TEST_START      -> every score printed here
+  test        from TEST_START                     -> NOT scored; held back for Phase 7
 
 Run from the repository root:
     python -m pipeline.failure_model.train_model
-Reads data/processed/training_3series.csv; saves plots to outputs/.
+Reads data/processed/training_3series.csv; saves plots and the reference
+scores to outputs/.
 """
 import matplotlib
 matplotlib.use("Agg")
@@ -31,11 +34,11 @@ from sklearn.metrics import brier_score_loss, log_loss, roc_auc_score
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-from config import MIN_TESTS_PER_POINT, OUTPUTS, TEST_START, TRAINING_CSV
+from config import (MIN_TESTS_PER_POINT, OUTPUTS, TEST_START, TRAINING_CSV,
+                    VALIDATION_START)
 from pipeline.common import generation
 
 DATA = TRAINING_CSV
-SPLIT_DATE = TEST_START
 MIN_CELL = MIN_TESTS_PER_POINT
 
 BASE_NUMERIC = [
@@ -111,13 +114,18 @@ def main() -> None:
     base_features = BASE_NUMERIC + FUEL_COLS
     text_features = base_features + TEXT_FEATURES
 
-    train = df[df["test_date"] < SPLIT_DATE]
-    test = df[df["test_date"] >= SPLIT_DATE]
+    train = df[df["test_date"] < VALIDATION_START]
+    # From here on, "test" in variable names means the VALIDATION period.
+    # The real test set (from TEST_START) is deliberately never touched.
+    test = df[(df["test_date"] >= VALIDATION_START) & (df["test_date"] < TEST_START)]
+    n_held_back = int((df["test_date"] >= TEST_START).sum())
     y_train, y_test = train["target_failed"].to_numpy(), test["target_failed"].to_numpy()
     base_rate = y_train.mean()
 
-    print(f"Train: {len(train):,} cycles before {SPLIT_DATE}, fail rate {100*y_train.mean():.1f}%")
-    print(f"Test:  {len(test):,} cycles from {SPLIT_DATE}, fail rate {100*y_test.mean():.1f}%\n")
+    print(f"Train:      {len(train):,} cycles before {VALIDATION_START}, fail rate {100*y_train.mean():.1f}%")
+    print(f"Validation: {len(test):,} cycles from {VALIDATION_START} to {TEST_START}, "
+          f"fail rate {100*y_test.mean():.1f}%")
+    print(f"Test:       {n_held_back:,} cycles from {TEST_START} - held back for Phase 7, not scored\n")
 
     preds = {"Baseline (gen + age)": baseline_predict(train, test)}
     fitted = {}
@@ -128,8 +136,13 @@ def main() -> None:
             fitted[name + label] = (model, feats)
 
     results = pd.DataFrame([score(k, y_test, p, base_rate) for k, p in preds.items()])
-    print("Test-set performance:")
+    print("Validation-set performance:")
     print(results.to_string(index=False), "\n")
+
+    # Save the reference scores, to copy into docs/decisions.md
+    OUTPUTS.mkdir(parents=True, exist_ok=True)
+    results.to_csv(OUTPUTS / "reference_scores.csv", index=False)
+    print("Saved outputs/reference_scores.csv\n")
 
     # What does the boosting model rely on once the text features are in?
     gbm, feats = fitted["Boosting + text"]
@@ -137,7 +150,7 @@ def main() -> None:
                                  n_repeats=5, random_state=0)
     ranked = (pd.Series(imp["importances_mean"], index=feats)
                 .sort_values(ascending=False).round(4))
-    print("Permutation importance, Boosting + text (drop in test AUC when shuffled):")
+    print("Permutation importance, Boosting + text (drop in validation AUC when shuffled):")
     print(ranked.head(15).to_string(), "\n")
 
     # Logistic coefficients for the text features: direction and size of each effect
@@ -155,11 +168,10 @@ def main() -> None:
         ax.plot(mean_pred, frac, marker="o", label=name)
     ax.set_xlabel("Predicted fail probability")
     ax.set_ylabel("Actual fail rate")
-    ax.set_title(f"Calibration on tests from {SPLIT_DATE}")
+    ax.set_title(f"Calibration on validation ({VALIDATION_START} to {TEST_START})")
     ax.set_xlim(0, 0.8); ax.set_ylim(0, 0.8)
     ax.legend(); ax.grid(alpha=0.3)
     fig.tight_layout()
-    OUTPUTS.mkdir(parents=True, exist_ok=True)
     fig.savefig(OUTPUTS / "calibration_3series.png", dpi=150)
     print("Saved calibration_3series.png\n")
 
