@@ -15,7 +15,7 @@ DATA_RAW = ROOT / "data" / "raw"                # source data (not in git)
 DATA_PROCESSED = ROOT / "data" / "processed"    # built tables (not in git)
 OUTPUTS = ROOT / "outputs"                      # charts, plots (not in git)
 
-DB_PATH = DATA_RAW / "mot_bulk_1pct.db"         # the 1% DVSA sample
+DB_PATH = Path("/Volumes/T7 Touch/MOT/mot_bulk_1pct.db")   # the 1% DVSA sample (kept outside the repo)         # the 1% DVSA sample
 TRAINING_CSV = DATA_PROCESSED / "training_3series.csv"
 
 SITE_DIR = Path("/Users/shaamiazeem/mot-site")  # the website repository
