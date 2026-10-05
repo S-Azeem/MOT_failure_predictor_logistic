@@ -78,7 +78,8 @@ def baseline_predict(train: pd.DataFrame, test: pd.DataFrame) -> np.ndarray:
            .merge(cell, on=["gen", "age_int"], how="left")
            .merge(gen_mean, on="gen", how="left"))
     pred = out["mean"].fillna(out["gen_mean"]).fillna(train["target_failed"].mean())
-    return pred.to_numpy()
+    
+    return pred.clip(0.01, 0.99).to_numpy()
 
 
 def make_logit():

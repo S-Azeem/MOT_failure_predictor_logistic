@@ -39,6 +39,8 @@ Copy from outputs/reference_scores.csv after running train_model.
 
 | Model | AUC | Brier skill |
 |---|---|---|
-| Baseline (gen + age) | | |
-| Logistic | | |
-| Boosting | | |
+| Baseline (gen + age) | 0.612| 2.1%|
+| Logistic | 0.659| 6.1%|
+| Boosting | 0.666| 6.9%|
+
+
