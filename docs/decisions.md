@@ -47,3 +47,5 @@ Copy from outputs/reference_scores.csv after running train_model.
 
 2026-10-06	Final features: age_years, n_prior_fails, fails_last_3, prev_odometer, prev_fail_items, prev_advisories, days_since_prev, make (top 20)	All VIF under 5. n_prior_fails and fails_last_3 correlate at 0.75, so both are kept subject to a sign check at fit
 
+2026-10-06
+validation AUC 0.702 against 0.654 for the baseline, Brier skill 10.2%, calibration slope 0.990, bands at 19.9%, 30.3% and 42.5%, and all coefficient signs as expected.
