@@ -1,0 +1,31 @@
+TEST SET VALIDATION  (141,791 cycles from 2024-01-01, fail rate 28.4%)
+Model: Roadworthy MOT failure model v1.0, built 2026-10-06
+
+Discrimination
+  Model AUC      0.699  (95% CI 0.696 to 0.702),  Gini 0.398
+  Baseline AUC   0.648  (95% CI 0.646 to 0.652)  age only
+
+Calibration
+  Slope 0.989 (gate 0.9 to 1.1), intercept -0.038
+  Mean predicted 28.9% vs actual 28.4%  (gap +0.5 points)
+  Brier skill 0.103
+  Worst decile off by 3.7 points
+
+Risk bands
+  Lower risk    19.7% fail  (60,133 cars)
+  Typical       30.8% fail  (55,581 cars)
+  Higher risk   43.4% fail  (26,077 cars)
+
+Segments (36 checked; gate: AUC >= 0.58, calibration within 5 points, segments of 500+ cars)
+  All gated segments pass
+
+Stability: score PSI train vs test 0.008 (stable)
+
+GATES
+  PASS  Beats the baseline, intervals not overlapping
+  PASS  Calibration slope 0.9 to 1.1
+  PASS  Bands rise from Lower to Typical to Higher risk
+  PASS  No segment fails AUC or calibration
+  PASS  Score PSI below 0.25
+
+A failed gate is reported as a limitation, not tuned away.
