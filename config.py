@@ -17,6 +17,7 @@ OUTPUTS = ROOT / "outputs"                      # charts, plots (not in git)
 
 DB_PATH = Path("/Volumes/T7 Touch/MOT/mot_bulk_1pct.db")   # the 1% DVSA sample (kept outside the repo)         # the 1% DVSA sample
 TRAINING_CSV = DATA_PROCESSED / "training_3series.csv"
+TRAINING_ALL_CSV = DATA_PROCESSED / "training_all.csv"         # all-vehicle model
 
 SITE_DIR = Path("/Users/shaamiazeem/mot-site")  # the website repository
 CHART_JSON = SITE_DIR / "data" / "failure-model" / "bmw-3-series.json"
@@ -27,6 +28,7 @@ RULES_CHANGE = "2018-05-20"    # MOT rule change: predict only tests from here;
 SNAPSHOT_END = "2026-02-04"    # bulk snapshot end; later tests are a skewed subset
 RETEST_GAP_DAYS = 60           # a test within this many days of the last is a retest
 MIN_TESTS_PER_POINT = 30       # smallest group shown on a chart
+SAMPLE_PCT = 20                # all-vehicle build: share of vehicles used (0-100)
 
 # ---- Train / validation / test split (by date) --------------------------------
 VALIDATION_START = "2023-01-01"   # roadmap Phase 0: selection decisions use 2023

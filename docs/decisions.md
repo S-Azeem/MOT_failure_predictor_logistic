@@ -43,4 +43,7 @@ Copy from outputs/reference_scores.csv after running train_model.
 | Logistic | 0.659| 6.1%|
 | Boosting | 0.666| 6.9%|
 
+2026-10-06	All-vehicle scope: cars and light vans. Bike makes excluded by name; Honda and Suzuki kept by car-model list; BMW bike patterns excluded; Triumph excluded	No vehicle class in the data; engine size can't separate bikes from small cars. Safety net found no missed brands
+
+2026-10-06	Final features: age_years, n_prior_fails, fails_last_3, prev_odometer, prev_fail_items, prev_advisories, days_since_prev, make (top 20)	All VIF under 5. n_prior_fails and fails_last_3 correlate at 0.75, so both are kept subject to a sign check at fit
 

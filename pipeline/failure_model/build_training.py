@@ -12,6 +12,14 @@ Advisory categories from the previous test:
   - tester notes (child seat fitted, undertrays, COVID extension...) are excluded
 It also prints how often the keyword rules agree with the codes.
 
+Phase 1 features (all from earlier cycles only):
+  mileage:        prev_odometer, annual_miles_last_interval, projected_miles
+  track record:   fails_last_3, n_prior_fails_pre2018, n_prior_fails_post2018,
+                  prev_test_pre2018
+  advisories:     advisory_trend, n_recurring_categories
+The three features that used the odometer reading AT the predicted test
+(odometer_miles, miles_since_prev, miles_per_year) are no longer built.
+
 A fully commented teaching copy is in docs/build_training_annotated.py.
 
 Run from the repository root:
@@ -97,6 +105,11 @@ cat_sums = ",\n         ".join(f"SUM(cat = '{c}') AS adv_{c}" for c in CATEGORIE
 cat_coalesce = ",\n         ".join(f"COALESCE(i.adv_{c},0) AS adv_{c}" for c in CATEGORIES + FLAGS)
 cat_lags = ",\n         ".join(f"LAG(c.adv_{c}) OVER w AS prev_adv_{c}" for c in CATEGORIES + FLAGS)
 
+# A category "recurs" if it appeared on BOTH of the two previous tests.
+RECURRING = ["tyres", "brakes", "suspension", "steering", "leaks", "corrosion"]
+recurring_sum = "\n           + ".join(
+    f"(LAG(c.adv_{c}, 1) OVER w > 0 AND LAG(c.adv_{c}, 2) OVER w > 0)" for c in RECURRING)
+
 QUERY = BASE_CTES + f""",
 classified AS (
   SELECT d.mot_test_number, d.type,
@@ -144,7 +157,6 @@ feat AS (
          v.fuel_type, v.engine_size,
          CAST(substr(v.start_date,1,4) AS INT) AS reg_year,
          ROUND((julianday(c.d) - julianday(v.start_date)) / 365.25, 2) AS age_years,
-         c.miles AS odometer_miles,
          ROW_NUMBER() OVER w - 1 AS n_prior_cycles,
          SUM(c.failed) OVER (w ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING) AS n_prior_fails,
          LAG(c.failed)       OVER w AS prev_failed,
@@ -153,7 +165,22 @@ feat AS (
          LAG(c.n_minor)      OVER w AS prev_minors,
          {cat_lags},
          julianday(c.d) - julianday(LAG(c.d) OVER w) AS days_since_prev,
-         c.miles - LAG(c.miles) OVER w AS miles_since_prev
+         -- Phase 1: mileage, from readings at EARLIER tests only
+         LAG(c.miles, 1) OVER w AS prev_odometer,
+         LAG(c.miles, 1) OVER w - LAG(c.miles, 2) OVER w AS _miles_last_interval,
+         julianday(LAG(c.d, 1) OVER w) - julianday(LAG(c.d, 2) OVER w) AS _days_last_interval,
+         -- Phase 1: track record
+         SUM(c.failed) OVER (w ROWS BETWEEN 3 PRECEDING AND 1 PRECEDING) AS fails_last_3,
+         SUM(CASE WHEN c.d < :rules_change THEN c.failed ELSE 0 END)
+             OVER (w ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING) AS n_prior_fails_pre2018,
+         SUM(CASE WHEN c.d >= :rules_change THEN c.failed ELSE 0 END)
+             OVER (w ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING) AS n_prior_fails_post2018,
+         (LAG(c.d) OVER w < :rules_change) AS prev_test_pre2018,
+         -- Phase 1: advisory patterns (need two earlier cycles, else blank)
+         LAG(c.n_advisory, 1) OVER w - LAG(c.n_advisory, 2) OVER w AS advisory_trend,
+         CASE WHEN LAG(c.d, 2) OVER w IS NULL THEN NULL ELSE
+           {recurring_sum}
+         END AS n_recurring_categories
   FROM cycles c
   JOIN veh v ON v.registration = c.registration
   WINDOW w AS (PARTITION BY c.registration ORDER BY c.completed_date)
@@ -205,7 +232,7 @@ def main() -> None:
 
     cur = con.execute(QUERY, {
         "target_start": TARGET_START, "target_end": TARGET_END, "gap": RETEST_GAP_DAYS,
-        "codes_from": CODES_FROM,
+        "codes_from": CODES_FROM, "rules_change": RULES_CHANGE,
     })
     cols = [c[0] for c in cur.description]
     rows = cur.fetchall()
@@ -213,16 +240,25 @@ def main() -> None:
 
     # Clean-up rules applied in Python so they're easy to read and change
     i = {c: k for k, c in enumerate(cols)}
-    cols.append("miles_per_year")
+    helpers = ["_miles_last_interval", "_days_last_interval"]   # used, then dropped
+    keep = [c for c in cols if c not in helpers]
+    out_cols = keep + ["annual_miles_last_interval", "projected_miles"]
     cleaned = []
     for r in rows:
-        r = list(r)
-        msp, dsp = r[i["miles_since_prev"]], r[i["days_since_prev"]]
-        if msp is not None and msp < 0:          # odometer went backwards: unreliable
-            r[i["miles_since_prev"]] = None
-            msp = None
-        r.append(round(msp / dsp * 365.25) if msp is not None and dsp else None)
-        cleaned.append(r)
+        miles, days = r[i["_miles_last_interval"]], r[i["_days_last_interval"]]
+        # Annual mileage over the last complete interval between two earlier tests.
+        # Blank if either reading is missing, or the odometer went backwards.
+        annual = None
+        if miles is not None and days and miles >= 0:
+            annual = round(miles / days * 365.25)
+        # Projected mileage at this test: last reading plus usual rate x time since.
+        prev_odo, gap = r[i["prev_odometer"]], r[i["days_since_prev"]]
+        projected = None
+        if prev_odo is not None and annual is not None and gap is not None:
+            projected = round(prev_odo + annual * gap / 365.25)
+        cleaned.append([r[i[c]] for c in keep] + [annual, projected])
+    cols = out_cols
+    i = {c: k for k, c in enumerate(cols)}
 
     assert cleaned, "No rows - check the database and filters"
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -248,15 +284,27 @@ def main() -> None:
             print(f"  {str(k):>14}: {100*fl/tot:5.1f}% fail  (n={tot:,})")
         print()
 
-    def had(col):
+    def banded(col, edges, labels):
         def key(r):
             v = r[i[col]]
-            return "no history" if v is None else ("yes" if v > 0 else "no")
+            if v is None:
+                return "no history"
+            for edge, label in zip(edges, labels):
+                if v <= edge:
+                    return label
+            return labels[-1]
         return key
 
-    for c in CATEGORIES + FLAGS:
-        rate_by(f"Previous test had a {c.replace('_', ' ')} advisory:", had(f"prev_adv_{c}"))
-
+    rate_by("Fails in the last 3 cycles:", banded("fails_last_3", [0, 1, 2], ["0", "1", "2", "3"]))
+    rate_by("Advisory categories recurring on both previous tests:",
+            banded("n_recurring_categories", [0, 1], ["0", "1", "2+"]))
+    rate_by("Advisory trend (previous minus the one before):",
+            banded("advisory_trend", [-1, 0], ["falling", "same", "rising"]))
+    rate_by("Previous test under the pre-2018 rules:",
+            banded("prev_test_pre2018", [0], ["no", "yes"]))
+    rate_by("Annual miles over the last interval:",
+            banded("annual_miles_last_interval", [5000, 10000, 15000],
+                   ["<5k", "5-10k", "10-15k", "15k+"]))
 
 if __name__ == "__main__":
     main()

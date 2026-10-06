@@ -6,14 +6,25 @@ Redundancy check for the failure model's features (roadmap Phase 3).
    from ALL the others combined - catches redundancy no single pair shows.
 
 Run from the repository root:
-    python -m analysis.redundancy_check
+    python -m analysis.redundancy_check          # 3 Series case study
+    python -m analysis.redundancy_check --all    # all-vehicle model
 """
+import sys
+
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 
-from config import TRAINING_CSV
+from config import TRAINING_ALL_CSV, TRAINING_CSV
 
-FEATURES = [
+# The all-vehicle model's numeric features. Make is left out: one-hot columns
+# always sum to 1, so their VIF is infinite by construction.
+ALL_VEHICLE_FEATURES = [
+    "age_years", "n_prior_fails", "fails_last_3", "prev_odometer",
+    "prev_fail_items", "prev_advisories", "days_since_prev",
+    "annual_miles_last_interval",   # swap candidate, included for comparison
+]
+
+FEATURES_3SERIES = [
     "age_years", "reg_year", "engine_size",
     "n_prior_cycles", "n_prior_fails", "prev_failed", "prev_advisories",
     "prev_fail_items", "prev_minors", "days_since_prev",
@@ -23,7 +34,13 @@ FEATURES = [
 # Fuel dummies are left out on purpose: one-hot columns always sum to 1, so
 # their VIF is infinite by construction (the "dummy variable trap").
 
-df = pd.read_csv(TRAINING_CSV)
+if "--all" in sys.argv:
+    FEATURES, DATA = ALL_VEHICLE_FEATURES, TRAINING_ALL_CSV
+else:
+    FEATURES, DATA = FEATURES_3SERIES, TRAINING_CSV
+print(f"Data: {DATA.name}")
+
+df = pd.read_csv(DATA)
 
 # Rows with history only: history features are blank for a car's first test.
 X = df[FEATURES].dropna()
