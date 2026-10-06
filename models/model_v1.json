@@ -1,0 +1,366 @@
+{
+  "preprocessing": {
+    "fill_values": {
+      "age_years": 8.66,
+      "n_prior_fails": 0.0,
+      "fails_last_3": 0.0,
+      "prev_odometer": 62474.0,
+      "prev_fail_items": 0.0,
+      "prev_advisories": 0.0,
+      "days_since_prev": 365.0
+    },
+    "means": {
+      "age_years": 9.495959600543127,
+      "n_prior_fails": 1.755871953198901,
+      "fails_last_3": 0.7516274621364171,
+      "prev_odometer": 70043.09536672496,
+      "prev_fail_items": 0.6972414298629267,
+      "prev_advisories": 1.2276911155402128,
+      "days_since_prev": 378.0278056051018
+    },
+    "sds": {
+      "age_years": 5.369026071462913,
+      "n_prior_fails": 2.145866550067982,
+      "fails_last_3": 0.9055050618268272,
+      "prev_odometer": 43490.564917294505,
+      "prev_fail_items": 1.5359075493533578,
+      "prev_advisories": 1.8847445866818289,
+      "days_since_prev": 124.19288287559355
+    },
+    "makes": [
+      "FORD",
+      "VAUXHALL",
+      "VOLKSWAGEN",
+      "MERCEDES-BENZ",
+      "BMW",
+      "TOYOTA",
+      "NISSAN",
+      "AUDI",
+      "PEUGEOT",
+      "RENAULT",
+      "CITROEN",
+      "HONDA",
+      "FIAT",
+      "LAND ROVER",
+      "HYUNDAI",
+      "KIA",
+      "MINI",
+      "SKODA",
+      "MAZDA",
+      "VOLVO"
+    ]
+  },
+  "columns": [
+    "age_years",
+    "n_prior_fails",
+    "fails_last_3",
+    "prev_odometer",
+    "prev_fail_items",
+    "prev_advisories",
+    "days_since_prev",
+    "no_history",
+    "odometer_missing",
+    "make_FORD",
+    "make_VAUXHALL",
+    "make_VOLKSWAGEN",
+    "make_MERCEDES-BENZ",
+    "make_BMW",
+    "make_TOYOTA",
+    "make_NISSAN",
+    "make_AUDI",
+    "make_PEUGEOT",
+    "make_RENAULT",
+    "make_CITROEN",
+    "make_HONDA",
+    "make_FIAT",
+    "make_LAND ROVER",
+    "make_HYUNDAI",
+    "make_KIA",
+    "make_MINI",
+    "make_SKODA",
+    "make_MAZDA",
+    "make_VOLVO"
+  ],
+  "coefficients": [
+    0.09570615274535946,
+    0.1464809108054541,
+    0.2348829977105199,
+    0.19214306537631434,
+    0.09971096928616528,
+    0.13707371837551113,
+    0.051338676833014824,
+    -0.46247056414324894,
+    -0.07111143308714492,
+    0.19121126322923312,
+    0.2896233033049253,
+    0.013693010660467846,
+    -0.1311714820852138,
+    -0.16997268617747346,
+    -0.034146133542559534,
+    0.23195851569975764,
+    -0.19270601968629766,
+    0.2943947002131444,
+    0.4380606200901735,
+    0.3864737365857041,
+    -0.028778472070729706,
+    0.2517723025088215,
+    -0.19142970931518274,
+    0.2070367903189389,
+    0.18994150469904192,
+    0.005303258866233703,
+    -0.028760225478231278,
+    0.12014632162606272,
+    -0.050855809864717945
+  ],
+  "intercept": -0.9500153428448276,
+  "calibration": {
+    "method": "platt",
+    "a": 0.9896384211449921,
+    "b": -0.12906909548992432
+  },
+  "bands": {
+    "method": "40th and 80th percentile of calibrated probability among cars of the same age, validation year",
+    "cutoffs_by_age": {
+      "3": [
+        0.12607290815599778,
+        0.16542315835309557
+      ],
+      "4": [
+        0.1574099500551488,
+        0.20920549195330748
+      ],
+      "5": [
+        0.17020027146268418,
+        0.23694779143039857
+      ],
+      "6": [
+        0.18614230072626392,
+        0.2614092235578339
+      ],
+      "7": [
+        0.19910910106965313,
+        0.29477380389875524
+      ],
+      "8": [
+        0.21633707473048222,
+        0.3277436966822148
+      ],
+      "9": [
+        0.23369794425533494,
+        0.36174507454089994
+      ],
+      "10": [
+        0.2528173373963153,
+        0.40052097983105045
+      ],
+      "11": [
+        0.2810643662750272,
+        0.43315182363092436
+      ],
+      "12": [
+        0.3050825976391949,
+        0.47358941326250503
+      ],
+      "13": [
+        0.3136317194013043,
+        0.48282396099026154
+      ],
+      "14": [
+        0.3359905725347772,
+        0.5184461699046461
+      ],
+      "15": [
+        0.3563825230153176,
+        0.5386860073307341
+      ],
+      "16": [
+        0.3735849134610226,
+        0.5598256557769704
+      ],
+      "17": [
+        0.39253744532519036,
+        0.5804789949983787
+      ],
+      "18": [
+        0.4027128381656646,
+        0.5869292157873576
+      ],
+      "19": [
+        0.4070417800408555,
+        0.5946759313842354
+      ],
+      "20": [
+        0.40150909480873226,
+        0.5916674288150958
+      ],
+      "21": [
+        0.4171630304256329,
+        0.6156592334562351
+      ],
+      "22": [
+        0.38697982417373855,
+        0.6158076548441818
+      ],
+      "23": [
+        0.40985973034882156,
+        0.6548276867210024
+      ],
+      "24": [
+        0.21241809794692443,
+        0.4012394765349919
+      ],
+      "25+": [
+        0.38191031135935133,
+        0.5978578230306224
+      ]
+    }
+  },
+  "name": "Roadworthy MOT failure model",
+  "version": "1.0",
+  "built": "2026-10-06",
+  "scope": "Cars and light vans, Great Britain; motorcycles excluded",
+  "vehicle_rules": {
+    "make_merges": {
+      "MERCEDES": "MERCEDES-BENZ",
+      "MERCEDES BENZ": "MERCEDES-BENZ",
+      "SMART (MCC)": "SMART",
+      "CHRYSLER-JEEP": "JEEP",
+      "HARLEY DAVIDSON": "HARLEY-DAVIDSON",
+      "LANDROVER": "LAND ROVER",
+      "LAND-ROVER": "LAND ROVER",
+      "VW": "VOLKSWAGEN",
+      "ROLLS ROYCE": "ROLLS-ROYCE",
+      "ALFA-ROMEO": "ALFA ROMEO"
+    },
+    "excluded_makes": [
+      "AJS",
+      "APRILIA",
+      "BENELLI",
+      "BETA",
+      "BRIXTON",
+      "BSA",
+      "BUELL",
+      "CAGIVA",
+      "CCM",
+      "DAELIM",
+      "DERBI",
+      "DUCATI",
+      "GAS GAS",
+      "GILERA",
+      "HARLEY-DAVIDSON",
+      "HERALD",
+      "HUSABERG",
+      "HUSQVARNA",
+      "HYOSUNG",
+      "INDIAN",
+      "JINLUN",
+      "KAWASAKI",
+      "KEEWAY",
+      "KTM",
+      "KYMCO",
+      "LAMBRETTA",
+      "LEXMOTO",
+      "LONCIN",
+      "MASH",
+      "MOTO GUZZI",
+      "MOTORINI",
+      "MUTT",
+      "MV AGUSTA",
+      "NIU",
+      "NORTON",
+      "PEUGEOT MOTOCYCLES",
+      "PIAGGIO",
+      "PIONEER",
+      "PUCH",
+      "QUADRO",
+      "RIEJU",
+      "ROYAL ENFIELD",
+      "SHERCO",
+      "SINNIS",
+      "SKYJET",
+      "SUKIDA",
+      "SUPER SOCO",
+      "SYM",
+      "TGB",
+      "TRIUMPH",
+      "VESPA",
+      "WK",
+      "YAMAHA",
+      "ZONGSHEN",
+      "ZONTES"
+    ],
+    "car_models": {
+      "HONDA": [
+        "ACCORD",
+        "AERODECK",
+        "BALLADE",
+        "CITY",
+        "CIVIC",
+        "CONCERTO",
+        "CR-V",
+        "CR-X",
+        "CR-Z",
+        "CRX",
+        "E",
+        "E:NY1",
+        "FR-V",
+        "HR-V",
+        "INSIGHT",
+        "INTEGRA",
+        "JAZZ",
+        "LEGEND",
+        "LOGO",
+        "NSX",
+        "ODYSSEY",
+        "PRELUDE",
+        "QUINTET",
+        "S2000",
+        "SHUTTLE",
+        "STREAM",
+        "ZR-V"
+      ],
+      "SUZUKI": [
+        "ACROSS",
+        "ALTO",
+        "BALENO",
+        "CAPPUCCINO",
+        "CARRY",
+        "CELERIO",
+        "CULTUS",
+        "ESCUDO",
+        "GRAND",
+        "IGNIS",
+        "JIMNY",
+        "KIZASHI",
+        "LIANA",
+        "S-CROSS",
+        "SAMURAI",
+        "SJ",
+        "SJ410",
+        "SJ413",
+        "SPLASH",
+        "SUPER",
+        "SWACE",
+        "SWIFT",
+        "SX4",
+        "VITARA",
+        "WAGON",
+        "WAGON-R",
+        "WAGON-R+",
+        "X-90"
+      ]
+    },
+    "bmw_bike_regex": "^([RKFGCS] ?\\d{2,4}|R SERIES|K SERIES|R NINE|HP\\d|CE ?0)",
+    "unknown_models": [
+      "",
+      "UNKNOWN"
+    ]
+  },
+  "training": {
+    "sample_pct": 20,
+    "train_cycles": 286489,
+    "validation_cycles": 66836,
+    "train_fail_rate": 0.30811654199637684,
+    "validation_auc_raw": 0.7018175713588787
+  }
+}
