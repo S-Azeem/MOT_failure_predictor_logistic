@@ -5,3 +5,6 @@ compatibility_date = "2026-10-01"
 [vars]
 # Sites allowed to call the Worker from a browser (the first is the default)
 ALLOWED_ORIGINS = "https://roadworthy.org.uk,https://www.roadworthy.org.uk,http://localhost:8000"
+
+[observability]
+enabled = true

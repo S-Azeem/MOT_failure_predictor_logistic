@@ -9,7 +9,7 @@
 // Setting (wrangler.toml [vars]): ALLOWED_ORIGINS, comma-separated
 
 import model from "../../models/model_v1.json";
-import { buildFeatures, dayNumber, predictionDay, testCycles } from "./features.js";
+import { buildFeatures, dayNumber, predictionDay } from "./features.js";
 import { cleanMake, inScope, riskBand, score } from "./model.js";
 
 const API_BASE = "https://history.mot.api.gov.uk";
@@ -79,8 +79,7 @@ export async function scoreVehicle(vehicle, todayDay) {
     return { ...base, supported: false,
              message: "Motorcycles and scooters aren't covered: this model is for cars and light vans." };
   }
-  const cycles = testCycles(vehicle);
-  const predDay = predictionDay(vehicle, cycles, todayDay);
+  const predDay = predictionDay(vehicle, todayDay);
   const features = buildFeatures(vehicle, predDay);
   if (features.age_years === null) {
     return { ...base, supported: false, message: "No first-registration date on record." };
@@ -124,7 +123,7 @@ export default {
       const resp = json(result, 200, { "Cache-Control": `max-age=${CACHE_SECONDS}` });
       ctx.waitUntil(cache.put(cacheKey, resp.clone()));
       return new Response(resp.body, { status: 200, headers: { ...Object.fromEntries(resp.headers), ...cors } });
-    } catch (err) {
+    } catch (err) { console.error("score failed:", reg, err.stack || err);
       return json({ error: "The MOT service is unavailable right now. Please try again shortly." }, 503, cors);
     }
   },

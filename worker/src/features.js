@@ -52,12 +52,15 @@ export function testCycles(vehicle) {
 }
 
 // The date the prediction is for: the MOT due date, or today if it has lapsed.
+// Uses ALL passed tests (retests included): a retest pass sets the new expiry.
 // A car with no MOT yet is due on its third anniversary of first use.
-export function predictionDay(vehicle, cycles, todayDay) {
-  const lastPass = [...cycles].reverse().find(c => !c.failed && c.expiry !== null);
+export function predictionDay(vehicle, todayDay) {
+  const expiries = (vehicle.motTests || [])
+    .filter(t => String(t.testResult).toUpperCase() === "PASSED" && t.expiryDate)
+    .map(t => dayNumber(t.expiryDate));
   let due;
-  if (lastPass) {
-    due = lastPass.expiry;
+  if (expiries.length) {
+    due = Math.max(...expiries);
   } else {
     const start = startDay(vehicle);
     if (start === null) return todayDay;
